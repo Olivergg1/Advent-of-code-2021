@@ -72,17 +72,75 @@ const part1 = (data) => {
   }
 
   const markedNumbers = new Set(drawnNumbers)
+  console.log(winningTile)
   const sumOfUnmarked = [...new Set(winningTile)]
     .filter((x) => !markedNumbers.has(x))
     .reduce((prev, curr) => prev + curr)
   console.log(sumOfUnmarked * drawnNumbers[drawnNumbers.length - 1])
 }
 
+const part2 = (data) => {
+  const [numbers, tiles] = manageData(data)
+  let drawnNumbers = []
+  let winningTile = []
+
+  for (let n of numbers) {
+    if (tiles.length === 0) break
+    if (tiles.length === 1) {
+      winningTile = tiles[0]
+        .join(',')
+        .split(',')
+        .map((i) => Number(i))
+    }
+
+    drawnNumbers.push(n)
+    for (let t = 0; t < tiles.length; t++) {
+      col: for (let c = 0; c < COLUMNS; c++) {
+        let column = []
+        for (let r = 0; r < ROWS; r++) {
+          let matchingNumbers = intersect(tiles[t][r], drawnNumbers).sort()
+          let currentRow = [...tiles[t][r]].sort()
+          if (
+            matchingNumbers.length === ROWS &&
+            matchingNumbers.every((v, i) => v === currentRow[i])
+          ) {
+            tiles.splice(t, 1)
+            break col
+          }
+          column.push(tiles[t][r][c])
+        }
+
+        let matchingNumbers = intersect(column, drawnNumbers).sort()
+        let sortedColumn = column.sort()
+        if (
+          matchingNumbers.length === COLUMNS &&
+          matchingNumbers.every((v, i) => v === sortedColumn[i])
+        ) {
+          tiles.splice(t, 1)
+          break col
+        }
+        column = []
+      }
+    }
+  }
+
+  const markedNumbers = new Set(drawnNumbers)
+  const sumOfUnmarked = [...new Set(winningTile)]
+    .filter((x) => !markedNumbers.has(x))
+    .reduce((prev, curr) => prev + curr)
+  console.log(
+    sumOfUnmarked,
+    drawnNumbers[drawnNumbers.length - 1],
+    sumOfUnmarked * drawnNumbers[drawnNumbers.length - 1]
+  )
+}
+
 const main = () => {
   fs.readFile('./input/day4.txt', 'utf8', (err, data) => {
     if (err) return console.log(err)
 
-    part1(data)
+    //part1(data)
+    part2(data)
   })
 }
 
